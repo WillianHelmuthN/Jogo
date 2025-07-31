@@ -1,6 +1,7 @@
-'use client';
+"use client";
 
-import { useEffect, useRef, useState, useCallback } from 'react';
+import { useEffect, useRef, useState, useCallback } from "react";
+import Link from "next/link";
 
 interface Garrafa {
   x: number;
@@ -38,7 +39,7 @@ const JogoGarrafa = () => {
   // Carregar imagens
   useEffect(() => {
     let imagensCarregadasCount = 0;
-    
+
     const verificarImagensCarregadas = () => {
       imagensCarregadasCount++;
       if (imagensCarregadasCount === 2) {
@@ -89,32 +90,35 @@ const JogoGarrafa = () => {
   };
 
   // Desenhar mira
-  const desenharMira = useCallback((ctx: CanvasRenderingContext2D) => {
-    ctx.strokeStyle = "#ff0000";
-    ctx.lineWidth = 3;
+  const desenharMira = useCallback(
+    (ctx: CanvasRenderingContext2D) => {
+      ctx.strokeStyle = "#ff0000";
+      ctx.lineWidth = 3;
 
-    // Desenha uma cruz como mira
-    ctx.beginPath();
-    // Linha horizontal
-    ctx.moveTo(miraX - miraTamanho / 2, miraY);
-    ctx.lineTo(miraX + miraTamanho / 2, miraY);
-    // Linha vertical
-    ctx.moveTo(miraX, miraY - miraTamanho / 2);
-    ctx.lineTo(miraX, miraY + miraTamanho / 2);
-    ctx.stroke();
+      // Desenha uma cruz como mira
+      ctx.beginPath();
+      // Linha horizontal
+      ctx.moveTo(miraX - miraTamanho / 2, miraY);
+      ctx.lineTo(miraX + miraTamanho / 2, miraY);
+      // Linha vertical
+      ctx.moveTo(miraX, miraY - miraTamanho / 2);
+      ctx.lineTo(miraX, miraY + miraTamanho / 2);
+      ctx.stroke();
 
-    // Círculo ao redor da mira
-    ctx.beginPath();
-    ctx.arc(miraX, miraY, miraTamanho / 2, 0, Math.PI * 2);
-    ctx.stroke();
-  }, [miraX, miraY, miraTamanho]);
+      // Círculo ao redor da mira
+      ctx.beginPath();
+      ctx.arc(miraX, miraY, miraTamanho / 2, 0, Math.PI * 2);
+      ctx.stroke();
+    },
+    [miraX, miraY, miraTamanho]
+  );
 
   // Game loop
   const gameLoop = useCallback(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    const ctx = canvas.getContext('2d');
+    const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
     // Limpa a tela
@@ -143,9 +147,15 @@ const JogoGarrafa = () => {
       garrafa.y = y;
 
       // Desenha a garrafa
-      if (imagensCarregadas && imagemGarrafaRef.current && imagemQuebradaRef.current) {
-        const imagemParaUsar = garrafa.acertada ? imagemQuebradaRef.current : imagemGarrafaRef.current;
-        
+      if (
+        imagensCarregadas &&
+        imagemGarrafaRef.current &&
+        imagemQuebradaRef.current
+      ) {
+        const imagemParaUsar = garrafa.acertada
+          ? imagemQuebradaRef.current
+          : imagemGarrafaRef.current;
+
         ctx.drawImage(
           imagemParaUsar,
           x - garrafa.largura / 2,
@@ -196,8 +206,8 @@ const JogoGarrafa = () => {
           garrafa.tempoQuebrada = Date.now();
 
           // Atualiza pontuação
-          setPontuacao(prev => prev + 10);
-          setGarrafasQuebradas(prev => prev + 1);
+          setPontuacao((prev) => prev + 10);
+          setGarrafasQuebradas((prev) => prev + 1);
 
           // Aumenta a velocidade de todas as garrafas
           garrafasRef.current.forEach((g) => {
@@ -218,14 +228,40 @@ const JogoGarrafa = () => {
     if (animationFrameRef.current) {
       cancelAnimationFrame(animationFrameRef.current);
     }
+    setPontuacao(0);
+    setGarrafasQuebradas(0);
     criarGarrafas(8, 150);
     gameLoop();
   };
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-[#5a2a0a] text-white">
-      <h1 className="text-3xl font-bold mb-6 text-center">Acerte as Garrafas</h1>
-      
+      {/* Navegação */}
+      <div className="absolute top-4 left-4">
+        <Link
+          href="/"
+          className="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg font-medium transition-colors text-sm"
+        >
+          ← Voltar ao Início
+        </Link>
+      </div>
+
+      <h1 className="text-3xl font-bold mb-6 text-center">
+        Acerte as Garrafas
+      </h1>
+
+      {/* Placar */}
+      <div className="flex gap-6 mb-4 text-lg">
+        <div className="bg-blue-900 px-4 py-2 rounded-lg">
+          <span className="font-bold">Pontuação: </span>
+          <span className="text-yellow-300">{pontuacao}</span>
+        </div>
+        <div className="bg-green-900 px-4 py-2 rounded-lg">
+          <span className="font-bold">Garrafas: </span>
+          <span className="text-yellow-300">{garrafasQuebradas}</span>
+        </div>
+      </div>
+
       <div className="mb-4">
         <button
           onClick={reiniciarJogo}
@@ -241,12 +277,15 @@ const JogoGarrafa = () => {
         height={CANVAS_HEIGHT}
         onClick={handleCanvasClick}
         className="bg-[#f0e68c] border-[10px] border-[#8b4513] cursor-crosshair"
-        style={{ cursor: 'crosshair' }}
+        style={{ cursor: "crosshair" }}
       />
-      
+
       <div className="mt-4 text-center max-w-md">
-        <p className="text-sm opacity-80">
+        <p className="text-sm opacity-80 mb-2">
           Clique quando as garrafas passarem pela mira vermelha no topo!
+        </p>
+        <p className="text-xs opacity-60">
+          Cada garrafa quebrada vale 10 pontos e aumenta a velocidade do jogo.
         </p>
       </div>
     </div>

@@ -1,36 +1,104 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Jogo de Apostas - Tiro ao Alvo
 
-## Getting Started
+Um projeto Next.js com um jogo interativo de tiro ao alvo nas garrafas.
 
-First, run the development server:
+## 🎯 Sobre o Jogo
+
+O **Tiro ao Alvo** é um jogo onde o jogador deve clicar no momento certo para acertar as garrafas que giram em órbita. Quando uma garrafa é acertada na mira vermelha:
+
+- ✅ A garrafa quebra e desaparece após 0.5 segundos
+- 🚀 A velocidade de todas as garrafas aumenta em 20%
+- 🏆 O jogador ganha 10 pontos
+- 📊 O contador de garrafas quebradas é incrementado
+
+## 🚀 Tecnologias Utilizadas
+
+- **Next.js 15.4.5** - Framework React
+- **React 19.1.0** - Biblioteca para interfaces
+- **TypeScript** - Tipagem estática
+- **Tailwind CSS** - Estilização
+- **Canvas API** - Renderização do jogo
+
+## 🎮 Como Jogar
+
+1. Acesse a página inicial em `http://localhost:3000`
+2. Clique no botão "🎯 Jogar Tiro ao Alvo"
+3. Observe as garrafas girando em círculo
+4. Clique quando uma garrafa passa pela mira vermelha no topo
+5. Tente quebrar o máximo de garrafas possível!
+6. Use o botão "Reiniciar Jogo" para começar novamente
+
+## 🛠️ Instalação e Execução
 
 ```bash
+# Clone o repositório
+git clone [url-do-repositorio]
+
+# Entre no diretório
+cd jogo-de-apostas
+
+# Instale as dependências
+npm install
+
+# Execute o projeto em modo de desenvolvimento
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+
+# Abra http://localhost:3000 no seu navegador
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 📁 Estrutura do Projeto
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```
+src/
+├── app/
+│   ├── jogo/
+│   │   └── page.tsx          # Página do jogo
+│   ├── layout.tsx            # Layout principal
+│   └── page.tsx              # Página inicial
+├── components/
+│   └── JogoGarrafa.tsx       # Componente principal do jogo
+public/
+├── images/
+│   ├── garrafa.png           # Imagem da garrafa inteira
+│   └── quebrada.png          # Imagem da garrafa quebrada
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 🎨 Características do Jogo
 
-## Learn More
+- **Gráficos**: Imagens customizadas para garrafas inteiras e quebradas
+- **Física**: Movimento circular suave das garrafas
+- **Progressão**: Aumento gradual da dificuldade
+- **Interface**: Design responsivo e intuitivo
+- **Placar**: Sistema de pontuação e contador de garrafas
+- **Navegação**: Links entre páginas e botão de reiniciar
 
-To learn more about Next.js, take a look at the following resources:
+## 🔧 Scripts Disponíveis
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- `npm run dev` - Executa em modo de desenvolvimento
+- `npm run build` - Cria build de produção
+- `npm run start` - Executa build de produção
+- `npm run lint` - Executa verificação de código
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## 📝 Migração Realizada
 
-## Deploy on Vercel
+Este projeto foi migrado de um jogo HTML/CSS/JavaScript vanilla para Next.js, incluindo:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+1. **Conversão para React**: Transformação do código JavaScript em componente React com hooks
+2. **Tipagem TypeScript**: Adição de tipos para maior segurança
+3. **Estilização Tailwind**: Migração dos estilos CSS para classes Tailwind
+4. **Roteamento Next.js**: Criação de páginas e navegação
+5. **Otimização de Imagens**: Uso do sistema de assets do Next.js
+6. **Estado Reativo**: Implementação de estado com useState para placar e controles
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## 🌟 Próximas Funcionalidades
+
+- [ ] Sistema de high scores
+- [ ] Diferentes níveis de dificuldade
+- [ ] Efeitos sonoros
+- [ ] Animações de explosão
+- [ ] Modo multiplayer
+- [ ] Conquistas e badges
+
+---
+
+Desenvolvido com ❤️ usando Next.js

@@ -1,4 +1,4 @@
-import JogoGarrafa from '@/components/JogoGarrafa';
+import JogoGarrafa from "@/components/JogoGarrafa";
 
 export default function JogoPage() {
   return <JogoGarrafa />;

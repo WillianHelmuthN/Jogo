@@ -27,6 +27,16 @@ const JogoGarrafa = () => {
   const [pontuacao, setPontuacao] = useState(0);
   const [garrafasQuebradas, setGarrafasQuebradas] = useState(0);
 
+  // Novos estados para o sistema de balas e tempo
+  const [balasRestantes, setBalasRestantes] = useState(8);
+  const [tempoRestante, setTempoRestante] = useState(30);
+  const [jogoAtivo, setJogoAtivo] = useState(false);
+  const [statusJogo, setStatusJogo] = useState<
+    "jogando" | "vitoria" | "derrota" | "inicial"
+  >("inicial");
+  const [mostrarPopup, setMostrarPopup] = useState(false);
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+
   // Configurações do jogo
   const CANVAS_WIDTH = 800;
   const CANVAS_HEIGHT = 600;
@@ -65,6 +75,9 @@ const JogoGarrafa = () => {
       if (animationFrameRef.current) {
         cancelAnimationFrame(animationFrameRef.current);
       }
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
     };
   }, []);
 
@@ -88,6 +101,71 @@ const JogoGarrafa = () => {
     }
     garrafasRef.current = novasGarrafas;
   };
+
+  // Iniciar jogo
+  const iniciarJogo = () => {
+    setStatusJogo("jogando");
+    setJogoAtivo(true);
+    setPontuacao(0);
+    setGarrafasQuebradas(0);
+    setBalasRestantes(8);
+    setTempoRestante(30);
+    setMostrarPopup(false);
+
+    criarGarrafas(8, 150);
+
+    // Iniciar timer de 30 segundos
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+    }
+
+    intervalRef.current = setInterval(() => {
+      setTempoRestante((prev) => {
+        if (prev <= 1) {
+          finalizarJogo("derrota");
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+  };
+
+  // Finalizar jogo
+  const finalizarJogo = (resultado: "vitoria" | "derrota") => {
+    setStatusJogo(resultado);
+    setJogoAtivo(false);
+    setMostrarPopup(true);
+
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+    }
+
+    if (animationFrameRef.current) {
+      cancelAnimationFrame(animationFrameRef.current);
+    }
+  };
+
+  // Verificar condições de vitória/derrota
+  const verificarStatusJogo = useCallback(() => {
+    if (!jogoAtivo) return;
+
+    // Vitória: todas as garrafas foram quebradas
+    if (garrafasQuebradas === 8) {
+      finalizarJogo("vitoria");
+      return;
+    }
+
+    // Derrota: sem balas e ainda há garrafas
+    if (balasRestantes === 0 && garrafasQuebradas < 8) {
+      finalizarJogo("derrota");
+      return;
+    }
+  }, [jogoAtivo, garrafasQuebradas, balasRestantes]);
+
+  // Effect para verificar status do jogo
+  useEffect(() => {
+    verificarStatusJogo();
+  }, [verificarStatusJogo]);
 
   // Desenhar mira
   const desenharMira = useCallback(
@@ -191,7 +269,10 @@ const JogoGarrafa = () => {
   // Manipular cliques
   const handleCanvasClick = () => {
     const canvas = canvasRef.current;
-    if (!canvas) return;
+    if (!canvas || !jogoAtivo || balasRestantes <= 0) return;
+
+    // Consome uma bala a cada clique
+    setBalasRestantes((prev) => prev - 1);
 
     // Verificar se alguma garrafa está na zona da mira
     garrafasRef.current.forEach((garrafa) => {
@@ -228,14 +309,25 @@ const JogoGarrafa = () => {
     if (animationFrameRef.current) {
       cancelAnimationFrame(animationFrameRef.current);
     }
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+    }
+
+    // Reset todos os estados
     setPontuacao(0);
     setGarrafasQuebradas(0);
+    setBalasRestantes(8);
+    setTempoRestante(30);
+    setStatusJogo("inicial");
+    setJogoAtivo(false);
+    setMostrarPopup(false);
+
     criarGarrafas(8, 150);
     gameLoop();
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-[#5a2a0a] text-white">
+    <div className="flex flex-col items-center justify-center min-h-screen bg-[#5a2a0a] text-white relative">
       {/* Navegação */}
       <div className="absolute top-4 left-4">
         <Link
@@ -250,24 +342,42 @@ const JogoGarrafa = () => {
         Acerte as Garrafas
       </h1>
 
-      {/* Placar */}
-      <div className="flex gap-6 mb-4 text-lg">
+      {/* Placar Expandido */}
+      <div className="flex gap-4 mb-4 text-lg flex-wrap justify-center">
         <div className="bg-blue-900 px-4 py-2 rounded-lg">
           <span className="font-bold">Pontuação: </span>
           <span className="text-yellow-300">{pontuacao}</span>
         </div>
         <div className="bg-green-900 px-4 py-2 rounded-lg">
           <span className="font-bold">Garrafas: </span>
-          <span className="text-yellow-300">{garrafasQuebradas}</span>
+          <span className="text-yellow-300">{garrafasQuebradas}/8</span>
+        </div>
+        <div className="bg-red-900 px-4 py-2 rounded-lg">
+          <span className="font-bold">Balas: </span>
+          <span className="text-yellow-300">{balasRestantes}</span>
+        </div>
+        <div className="bg-purple-900 px-4 py-2 rounded-lg">
+          <span className="font-bold">Tempo: </span>
+          <span className="text-yellow-300">{tempoRestante}s</span>
         </div>
       </div>
 
-      <div className="mb-4">
+      {/* Botões de Controle */}
+      <div className="mb-4 flex gap-4">
+        {statusJogo === "inicial" && (
+          <button
+            onClick={iniciarJogo}
+            className="px-6 py-2 bg-green-600 hover:bg-green-700 rounded-lg font-medium transition-colors"
+          >
+            🎯 Iniciar Jogo
+          </button>
+        )}
+
         <button
           onClick={reiniciarJogo}
           className="px-6 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg font-medium transition-colors"
         >
-          Reiniciar Jogo
+          🔄 Reiniciar Jogo
         </button>
       </div>
 
@@ -276,18 +386,89 @@ const JogoGarrafa = () => {
         width={CANVAS_WIDTH}
         height={CANVAS_HEIGHT}
         onClick={handleCanvasClick}
-        className="bg-[#f0e68c] border-[10px] border-[#8b4513] cursor-crosshair"
-        style={{ cursor: "crosshair" }}
+        className={`bg-[#f0e68c] border-[10px] border-[#8b4513] ${
+          jogoAtivo ? "cursor-crosshair" : "cursor-not-allowed opacity-70"
+        }`}
+        style={{ cursor: jogoAtivo ? "crosshair" : "not-allowed" }}
       />
 
       <div className="mt-4 text-center max-w-md">
         <p className="text-sm opacity-80 mb-2">
-          Clique quando as garrafas passarem pela mira vermelha no topo!
+          {statusJogo === "inicial"
+            ? 'Clique em "Iniciar Jogo" para começar!'
+            : "Clique quando as garrafas passarem pela mira vermelha no topo!"}
         </p>
         <p className="text-xs opacity-60">
-          Cada garrafa quebrada vale 10 pontos e aumenta a velocidade do jogo.
+          Você tem {statusJogo === "inicial" ? "8" : balasRestantes} balas para
+          quebrar todas as 8 garrafas em 30 segundos!
         </p>
       </div>
+
+      {/* Popup de Resultado */}
+      {mostrarPopup && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white text-black p-8 rounded-lg text-center max-w-md mx-4">
+            {statusJogo === "vitoria" ? (
+              <>
+                <div className="text-6xl mb-4">🎉</div>
+                <h2 className="text-2xl font-bold mb-2 text-green-600">
+                  PARABÉNS!
+                </h2>
+                <p className="mb-4">
+                  Você conseguiu quebrar todas as garrafas!
+                </p>
+                <p className="text-lg font-semibold mb-4">
+                  Pontuação Final:{" "}
+                  <span className="text-green-600">{pontuacao}</span>
+                </p>
+                <p className="text-sm text-gray-600 mb-6">
+                  Tempo restante: {tempoRestante}s | Balas restantes:{" "}
+                  {balasRestantes}
+                </p>
+              </>
+            ) : (
+              <>
+                <div className="text-6xl mb-4">😔</div>
+                <h2 className="text-2xl font-bold mb-2 text-red-600">
+                  GAME OVER!
+                </h2>
+                <p className="mb-4">
+                  {balasRestantes === 0
+                    ? "Suas balas acabaram!"
+                    : "O tempo acabou!"}
+                </p>
+                <p className="text-lg font-semibold mb-4">
+                  Pontuação: <span className="text-blue-600">{pontuacao}</span>
+                </p>
+                <p className="text-sm text-gray-600 mb-6">
+                  Garrafas quebradas: {garrafasQuebradas}/8
+                </p>
+              </>
+            )}
+
+            <div className="flex gap-4 justify-center">
+              <button
+                onClick={() => {
+                  setMostrarPopup(false);
+                  iniciarJogo();
+                }}
+                className="px-6 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors"
+              >
+                🎯 Jogar Novamente
+              </button>
+              <button
+                onClick={() => {
+                  setMostrarPopup(false);
+                  reiniciarJogo();
+                }}
+                className="px-6 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg font-medium transition-colors"
+              >
+                🏠 Menu Principal
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -15,7 +15,7 @@ export const useGarrafas = () => {
           angulo: ((Math.PI * 2) / quantidade) * i,
           velocidadeAngular: 0.01,
           raioOrbita: raioOrbita,
-          raioGarrafa: 25,
+          raioGarrafa: 18,
           largura: 40,
           altura: 60,
           acertada: false,

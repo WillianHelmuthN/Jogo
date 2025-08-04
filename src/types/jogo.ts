@@ -3,6 +3,7 @@ export interface Garrafa {
   y: number;
   angulo: number;
   velocidadeAngular: number;
+  direcao: 1 | -1; // 1 para horário, -1 para anti-horário
   raioOrbita: number;
   raioGarrafa: number;
   largura: number;

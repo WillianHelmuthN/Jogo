@@ -9,11 +9,17 @@ export const useGarrafas = () => {
     (quantidade: number, raioOrbita: number) => {
       const novasGarrafas: Garrafa[] = [];
       for (let i = 0; i < quantidade; i++) {
+        // Gera velocidade aleatória entre 0.005 e 0.02
+        const velocidadeBase = 0.005 + Math.random() * 0.015;
+        // Gera direção aleatória (50% chance para cada direção)
+        const direcao = Math.random() < 0.5 ? 1 : -1;
+        
         novasGarrafas.push({
           x: 0,
           y: 0,
           angulo: ((Math.PI * 2) / quantidade) * i,
-          velocidadeAngular: 0.01,
+          velocidadeAngular: velocidadeBase,
+          direcao: direcao,
           raioOrbita: raioOrbita,
           raioGarrafa: 18,
           largura: 40,
@@ -43,7 +49,7 @@ export const useGarrafas = () => {
             garrafa.tempoQuebrada = Date.now();
             acertou = true;
 
-            // Aumenta a velocidade de todas as garrafas
+            // Aumenta a velocidade de todas as garrafas mantendo a direção
             garrafasRef.current.forEach((g) => {
               g.velocidadeAngular *= CONFIGURACAO_JOGO.MULTIPLICADOR_VELOCIDADE;
             });

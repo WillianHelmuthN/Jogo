@@ -87,7 +87,8 @@ export const CanvasJogo = ({
 
       // Atualiza a posição (só gira se não foi acertada)
       if (!garrafa.acertada) {
-        garrafa.angulo += garrafa.velocidadeAngular;
+        // Aplica a direção na velocidade angular
+        garrafa.angulo += garrafa.velocidadeAngular * garrafa.direcao;
       }
 
       // Calcula nova posição
